@@ -1,0 +1,603 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Cannibals &amp; Missionary Problem</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Merriweather:ital,wght@0,300;0,400;0,700;1,300;1,400&display=swap" rel="stylesheet"/>
+<style>
+/* ── TOKENS ── */
+:root {
+  --bg:        #f7f8fa;
+  --bg2:       #ffffff;
+  --bg3:       #f0f4f8;
+  --border:    #dde3ec;
+  --border2:   #c8d3e0;
+  --txt1:      #1a2332;
+  --txt2:      #4a5568;
+  --txt3:      #8896aa;
+  --blue:      #2563eb;
+  --blue-l:    #eff4ff;
+  --blue-b:    #1d4ed8;
+  --red:       #dc2626;
+  --red-l:     #fff0f0;
+  --green:     #16a34a;
+  --green-l:   #f0fdf4;
+  --amber:     #d97706;
+  --amber-l:   #fffbeb;
+  --shadow:    0 1px 3px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.05);
+  --shadow2:   0 4px 12px rgba(0,0,0,0.08);
+  --r:         8px;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{height:100%;scroll-behavior:smooth}
+body{
+  font-family:'Inter',system-ui,sans-serif;
+  background:var(--bg);color:var(--txt1);
+  min-height:100vh;line-height:1.5;
+}
+::-webkit-scrollbar{width:5px}
+::-webkit-scrollbar-thumb{background:var(--border2);border-radius:4px}
+
+/* ── NAV ── */
+nav{
+  position:sticky;top:0;z-index:100;
+  background:#fff;border-bottom:1px solid var(--border);
+  display:flex;align-items:center;justify-content:space-between;
+  padding:0 2rem;height:56px;
+  box-shadow:var(--shadow);
+}
+.nav-brand{display:flex;align-items:center;gap:.6rem}
+.nav-icon{
+  width:32px;height:32px;border-radius:7px;
+  background:var(--blue);
+  display:flex;align-items:center;justify-content:center;
+  font-size:1rem;color:#fff;flex-shrink:0;
+}
+.nav-title{font-size:.92rem;font-weight:700;color:var(--txt1);letter-spacing:-.01em}
+.nav-sub{font-size:.6rem;color:var(--txt3);letter-spacing:.04em;display:block}
+.nav-links{display:flex;gap:.5rem;align-items:center}
+.nav-link{
+  font-size:.78rem;font-weight:500;padding:.35rem .8rem;
+  border-radius:6px;border:1px solid var(--border);
+  color:var(--txt2);text-decoration:none;
+  transition:all .15s;
+}
+.nav-link:hover{background:var(--bg3);border-color:var(--border2);color:var(--txt1)}
+.nav-link.active{background:var(--blue-l);border-color:#93c5fd;color:var(--blue)}
+.nav-link.play{
+  background:var(--blue);border-color:var(--blue);
+  color:#fff;font-weight:600;
+}
+.nav-link.play:hover{background:var(--blue-b)}
+
+/* ── TWO-COLUMN LAYOUT ── */
+.layout{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  min-height:calc(100vh - 56px);
+  border-top:none;
+}
+.col{
+  padding:2rem;
+  overflow-y:auto;
+  border-right:1px solid var(--border);
+}
+.col:last-child{border-right:none}
+
+/* ── SECTION TITLES ── */
+.col-header{margin-bottom:1.5rem;padding-bottom:1rem;border-bottom:2px solid var(--border)}
+.col-num{
+  display:inline-block;
+  font-size:.65rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;
+  color:var(--blue);background:var(--blue-l);border:1px solid #93c5fd;
+  padding:.15rem .55rem;border-radius:5px;margin-bottom:.5rem;
+}
+.col-title{
+  font-family:'Merriweather',serif;
+  font-size:1.5rem;font-weight:700;color:var(--txt1);
+  line-height:1.25;margin-bottom:.35rem;
+}
+.col-desc{font-size:.88rem;color:var(--txt2);line-height:1.6}
+
+/* ── SECTION LABELS ── */
+.sec-label{
+  font-size:.68rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;
+  color:var(--txt3);margin:1.5rem 0 .7rem;
+  display:flex;align-items:center;gap:.5rem;
+}
+.sec-label::after{content:'';flex:1;height:1px;background:var(--border)}
+
+/* ── STORY ── */
+.story p{font-size:.9rem;color:var(--txt2);line-height:1.7;margin-bottom:.6rem}
+.story p strong{color:var(--txt1);font-weight:600}
+.story p em{color:var(--blue);font-style:normal;font-weight:500}
+
+/* ── CHARACTER CARDS ── */
+.char-grid{display:grid;grid-template-columns:1fr 1fr;gap:.65rem;margin-bottom:.5rem}
+.char-card{
+  display:flex;align-items:center;gap:.7rem;
+  padding:.75rem .9rem;
+  border:1px solid var(--border);border-radius:var(--r);
+  background:#fff;transition:box-shadow .2s,border-color .2s;
+}
+.char-card:hover{box-shadow:var(--shadow2);border-color:var(--border2)}
+.char-card svg{width:36px;height:50px;flex-shrink:0}
+.char-info .char-name{font-size:.82rem;font-weight:600;color:var(--txt1)}
+.char-info .char-type{font-size:.65rem;font-weight:600;letter-spacing:.08em;text-transform:uppercase;margin-top:.1rem}
+.char-info .char-type.m{color:var(--amber)}
+.char-info .char-type.c{color:var(--red)}
+
+/* ── DOMAIN GRID ── */
+.domain-grid{display:grid;grid-template-columns:1fr 1fr;gap:.65rem}
+.d-card{
+  padding:.85rem;border:1px solid var(--border);border-radius:var(--r);
+  background:#fff;
+}
+.d-icon{font-size:1.2rem;margin-bottom:.3rem}
+.d-label{font-size:.62rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--blue);margin-bottom:.18rem}
+.d-val{font-size:.82rem;font-weight:600;color:var(--txt1);margin-bottom:.12rem}
+.d-desc{font-size:.73rem;color:var(--txt2);line-height:1.45}
+
+/* ── VARIABLE TABLE ── */
+.var-table{width:100%;border-collapse:collapse;font-size:.8rem}
+.var-table th{
+  text-align:left;padding:.45rem .65rem;
+  font-size:.62rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;
+  color:var(--txt3);border-bottom:2px solid var(--border);
+  background:var(--bg3);
+}
+.var-table td{
+  padding:.42rem .65rem;border-bottom:1px solid var(--border);
+  color:var(--txt2);vertical-align:top;line-height:1.5;
+}
+.var-table tr:last-child td{border-bottom:none}
+.var-table tr:hover td{background:var(--bg3)}
+.var-sym{
+  font-family:monospace;font-size:.8rem;font-weight:700;
+  background:var(--amber-l);border:1px solid #fcd34d;
+  color:var(--amber);padding:.05rem .35rem;border-radius:4px;
+  white-space:nowrap;display:inline-block;
+}
+
+/* ── DIFFICULTY PICKER ── */
+.diff-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:.6rem}
+.d-pick{
+  padding:.8rem .5rem;border:2px solid var(--border);
+  border-radius:var(--r);text-align:center;cursor:pointer;
+  background:#fff;transition:all .15s;position:relative;
+}
+.d-pick:hover{border-color:var(--border2);box-shadow:var(--shadow)}
+.d-pick.sel{border-color:var(--blue);background:var(--blue-l)}
+.d-pick .dn{font-size:.92rem;font-weight:700;color:var(--txt1);margin-bottom:.1rem}
+.d-pick .ds{font-size:.62rem;color:var(--txt3);margin-bottom:.25rem}
+.d-pick .db{
+  font-size:.65rem;font-weight:600;display:inline-block;
+  padding:.1rem .45rem;border-radius:5px;
+  background:var(--bg3);border:1px solid var(--border);color:var(--txt2);
+}
+.d-pick.sel .db{background:var(--blue-l);border-color:#93c5fd;color:var(--blue)}
+.d-tick{position:absolute;top:5px;right:5px;width:14px;height:14px;border-radius:50%;background:var(--blue);display:none;align-items:center;justify-content:center;font-size:.55rem;color:#fff;font-weight:700}
+.d-pick.sel .d-tick{display:flex}
+
+/* ── CTA BUTTON ── */
+.cta{
+  display:inline-flex;align-items:center;gap:.45rem;
+  padding:.65rem 1.6rem;border-radius:var(--r);
+  background:var(--blue);color:#fff;border:none;cursor:pointer;
+  font-family:'Inter',sans-serif;font-size:.88rem;font-weight:600;
+  text-decoration:none;transition:all .15s;
+  box-shadow:0 2px 8px rgba(37,99,235,.3);
+}
+.cta:hover{background:var(--blue-b);box-shadow:0 4px 14px rgba(37,99,235,.4);transform:translateY(-1px)}
+
+/* ── CONSTRAINT CARDS ── */
+.c-list{display:flex;flex-direction:column;gap:.6rem}
+.c-card{
+  display:flex;gap:.8rem;align-items:flex-start;
+  padding:.85rem;border:1px solid var(--border);border-radius:var(--r);
+  background:#fff;transition:box-shadow .2s;
+}
+.c-card:hover{box-shadow:var(--shadow2)}
+.c-badge{
+  width:28px;height:28px;border-radius:50%;flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;
+  font-size:.7rem;font-weight:700;margin-top:.1rem;
+}
+.c-badge.b{background:var(--blue-l);color:var(--blue);border:1px solid #93c5fd}
+.c-badge.r{background:var(--red-l);color:var(--red);border:1px solid #fca5a5}
+.c-badge.g{background:var(--green-l);color:var(--green);border:1px solid #86efac}
+.c-title{font-size:.85rem;font-weight:600;color:var(--txt1);margin-bottom:.22rem}
+.c-desc{font-size:.8rem;color:var(--txt2);line-height:1.6}
+.c-desc strong{color:var(--txt1);font-weight:600}
+.c-desc code{
+  font-family:monospace;font-size:.75rem;
+  background:var(--bg3);border:1px solid var(--border);
+  color:var(--txt1);padding:.05rem .3rem;border-radius:4px;
+}
+
+/* ── EXAMPLE BOX ── */
+.ex-box{
+  padding:.9rem 1rem;border:1px solid var(--border);
+  border-radius:var(--r);background:var(--bg3);
+}
+.ex-ttl{font-size:.65rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--txt3);margin-bottom:.6rem}
+.ex-row{display:flex;align-items:center;gap:.5rem;padding:.2rem 0;font-size:.78rem;color:var(--txt2)}
+.ok{color:var(--green);font-weight:700;font-size:.72rem;min-width:40px}
+.bad{color:var(--red);font-weight:700;font-size:.72rem;min-width:40px}
+.chips{display:flex;gap:.2rem}
+.chip{font-size:.65rem;font-weight:600;padding:.1rem .4rem;border-radius:5px}
+.chip.m{background:var(--amber-l);border:1px solid #fcd34d;color:var(--amber)}
+.chip.c{background:var(--red-l);border:1px solid #fca5a5;color:var(--red)}
+
+/* ── HOW TO PLAY ── */
+.ctrl-list{display:flex;flex-direction:column}
+.ctrl-row{
+  display:flex;align-items:center;gap:.65rem;
+  padding:.42rem 0;border-bottom:1px solid var(--border);
+  font-size:.8rem;color:var(--txt2);
+}
+.ctrl-row:last-child{border-bottom:none}
+.ctrl-key{
+  font-family:monospace;font-size:.7rem;font-weight:700;
+  padding:.15rem .45rem;border-radius:5px;
+  background:var(--bg3);border:1px solid var(--border);
+  color:var(--txt1);flex-shrink:0;white-space:nowrap;
+}
+
+/* ── TEAM SECTION ── */
+.team-box{
+  border:1px solid var(--border);border-radius:var(--r);
+  overflow:hidden;
+}
+.team-hdr{
+  background:var(--txt1);color:#fff;
+  padding:.85rem 1rem;
+  display:flex;align-items:center;gap:.65rem;
+}
+.team-hdr-icon{font-size:1.1rem}
+.team-hdr-title{font-size:.88rem;font-weight:700;letter-spacing:.02em}
+.team-hdr-sub{font-size:.62rem;opacity:.65;margin-top:.05rem;letter-spacing:.04em}
+.team-body{background:#fff;padding:.5rem .85rem}
+.member{
+  display:flex;align-items:center;gap:.8rem;
+  padding:.65rem 0;border-bottom:1px solid var(--border);
+  transition:background .15s;
+}
+.member:last-child{border-bottom:none}
+.member:hover{background:var(--bg3);margin:0 -.85rem;padding:.65rem .85rem}
+.avatar{
+  width:36px;height:36px;border-radius:50%;flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;
+  font-size:.82rem;font-weight:700;color:#fff;
+}
+.av1{background:#2563eb}
+.av2{background:#16a34a}
+.av3{background:#7c3aed}
+.member-info .m-name{font-size:.85rem;font-weight:600;color:var(--txt1)}
+.member-info .m-role{font-size:.65rem;color:var(--txt3);margin-top:.05rem;letter-spacing:.04em}
+.member-num{font-size:.65rem;color:var(--txt3);margin-left:auto;font-family:monospace}
+
+/* ── FOOTER STRIP ── */
+.footer-strip{
+  padding:.85rem 2rem;
+  background:#fff;border-top:1px solid var(--border);
+  display:flex;align-items:center;justify-content:space-between;
+  gap:1rem;flex-wrap:wrap;
+}
+.footer-note{font-size:.72rem;color:var(--txt3)}
+
+/* ── RESPONSIVE ── */
+@media(max-width:800px){
+  .layout{grid-template-columns:1fr}
+  .col{border-right:none;border-bottom:1px solid var(--border)}
+  .char-grid{grid-template-columns:1fr 1fr}
+}
+@media(max-width:520px){
+  nav{padding:0 1rem}
+  .col{padding:1.2rem}
+  .domain-grid{grid-template-columns:1fr}
+  .nav-title{font-size:.8rem}
+}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-brand">
+    <div class="nav-icon">⛵</div>
+    <div>
+      <span class="nav-title">Cannibals &amp; Missionary Problem</span>
+      <span class="nav-sub">AI · Constraint Satisfaction Problem</span>
+    </div>
+  </div>
+  <div class="nav-links">
+    <a class="nav-link active" href="index.html">Introduction</a>
+    <a class="nav-link" href="game.html">Rules</a>
+    <a class="nav-link play" href="game.html" id="playLink">▶ Play Now</a>
+  </div>
+</nav>
+
+<!-- TWO-COLUMN LAYOUT -->
+<div class="layout">
+
+  <!-- ═══ LEFT — INTRO ═══ -->
+  <div class="col">
+
+    <div class="col-header">
+      <div class="col-num">Window 01 — Introduction</div>
+      <div class="col-title">The Cannibals &amp; Missionary Problem</div>
+      <div class="col-desc">A foundational puzzle in Artificial Intelligence exploring state-space search and constraint satisfaction.</div>
+    </div>
+
+    <!-- Story -->
+    <div class="sec-label">The Problem</div>
+    <div class="story">
+      <p>A group of <strong>N missionaries</strong> and <strong>N cannibals</strong> must cross a river using a single boat that holds <em>at most 2 people</em>. The boat cannot cross the river empty — someone must always row.</p>
+      <p>The critical constraint: cannibals must <strong>never outnumber missionaries</strong> on either bank. If they do, the missionaries are in danger and the crossing fails.</p>
+      <p>This puzzle is a classic <strong>AI search problem</strong>, solved optimally using <em>Breadth-First Search (BFS)</em> — the same algorithm used in this game's Auto-Solve feature.</p>
+    </div>
+
+    <!-- Characters -->
+    <div class="sec-label">The Characters</div>
+    <div class="char-grid" id="charGrid"></div>
+
+    <!-- Domain -->
+    <div class="sec-label">Problem Domain</div>
+    <div class="domain-grid">
+      <div class="d-card"><div class="d-icon">🗺️</div><div class="d-label">State Space</div><div class="d-val">Finite & Discrete</div><div class="d-desc">Each state is uniquely described by the count of missionaries and cannibals on each bank plus the boat's position.</div></div>
+      <div class="d-card"><div class="d-icon">🔍</div><div class="d-label">Search Algorithm</div><div class="d-val">Breadth-First Search</div><div class="d-desc">BFS guarantees the shortest solution path by exploring all states level by level.</div></div>
+      <div class="d-card"><div class="d-icon">📐</div><div class="d-label">Problem Class</div><div class="d-val">CSP / State-Space Search</div><div class="d-desc">Constraint Satisfaction Problem with a defined goal state and a set of forbidden configurations.</div></div>
+      <div class="d-card"><div class="d-icon">🚣</div><div class="d-label">Boat Capacity</div><div class="d-val">1 – 2 persons per trip</div><div class="d-desc">At least 1 person must row. No empty crossings allowed. Maximum 2 passengers per crossing.</div></div>
+      <div class="d-card"><div class="d-icon">🎯</div><div class="d-label">Initial State</div><div class="d-val">All on Bank A</div><div class="d-desc">N missionaries, N cannibals, and the boat all begin on the left bank (Bank A).</div></div>
+      <div class="d-card"><div class="d-icon">🏆</div><div class="d-label">Goal State</div><div class="d-val">All on Bank B</div><div class="d-desc">All N missionaries and N cannibals successfully transferred to the right bank (Bank B).</div></div>
+    </div>
+
+    <!-- Variables -->
+    <div class="sec-label">State Variables</div>
+    <table class="var-table">
+      <thead>
+        <tr><th>Symbol</th><th>Variable</th><th>Domain</th><th>Meaning</th></tr>
+      </thead>
+      <tbody>
+        <tr><td><span class="var-sym">M<sub>L</sub></span></td><td>Missionaries Left</td><td>0 … N</td><td>Missionaries currently on Bank A</td></tr>
+        <tr><td><span class="var-sym">C<sub>L</sub></span></td><td>Cannibals Left</td><td>0 … N</td><td>Cannibals currently on Bank A</td></tr>
+        <tr><td><span class="var-sym">M<sub>R</sub></span></td><td>Missionaries Right</td><td>0 … N</td><td>Missionaries currently on Bank B</td></tr>
+        <tr><td><span class="var-sym">C<sub>R</sub></span></td><td>Cannibals Right</td><td>0 … N</td><td>Cannibals currently on Bank B</td></tr>
+        <tr><td><span class="var-sym">B</span></td><td>Boat Position</td><td>{L, R}</td><td>Current side the boat is docked on</td></tr>
+        <tr><td><span class="var-sym">N</span></td><td>Difficulty (N)</td><td>{2, 3, 4}</td><td>Total missionaries = total cannibals</td></tr>
+      </tbody>
+    </table>
+    <p style="font-size:.74rem;color:var(--txt3);margin-top:.5rem">Invariants: M<sub>L</sub> + M<sub>R</sub> = N &nbsp;and&nbsp; C<sub>L</sub> + C<sub>R</sub> = N always hold.</p>
+
+    <!-- Difficulty -->
+    <div class="sec-label" style="margin-top:1.5rem">Choose Difficulty</div>
+    <div class="diff-grid">
+      <div class="d-pick" data-n="2" data-steps="5" onclick="pickDiff(this)">
+        <div class="dn">Easy</div><div class="ds">N = 2</div>
+        <div class="db">2M + 2C</div><div class="d-tick">✓</div>
+      </div>
+      <div class="d-pick sel" data-n="3" data-steps="11" onclick="pickDiff(this)">
+        <div class="dn">Classic</div><div class="ds">N = 3</div>
+        <div class="db">3M + 3C</div><div class="d-tick">✓</div>
+      </div>
+      <div class="d-pick" data-n="4" data-steps="24" onclick="pickDiff(this)">
+        <div class="dn">Hard</div><div class="ds">N = 4</div>
+        <div class="db">4M + 4C</div><div class="d-tick">✓</div>
+      </div>
+    </div>
+
+    <div style="margin-top:1.5rem;padding-top:1rem;border-top:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:.8rem">
+      <span style="font-size:.78rem;color:var(--txt3)">Select difficulty above, then start playing</span>
+      <a href="game.html" id="ctaLink"><button class="cta">⛵ Start Playing →</button></a>
+    </div>
+
+  </div><!-- /left col -->
+
+  <!-- ═══ RIGHT — CONSTRAINTS + RULES + TEAM ═══ -->
+  <div class="col">
+
+    <div class="col-header">
+      <div class="col-num">Window 02 — Constraints &amp; Rules</div>
+      <div class="col-title">Problem Constraints &amp; Rules of Play</div>
+      <div class="col-desc">These constraints define every valid game state. Violating any one of them ends the crossing in failure.</div>
+    </div>
+
+    <!-- Constraints -->
+    <div class="sec-label">Formal Constraints</div>
+    <div class="c-list">
+      <div class="c-card">
+        <div class="c-badge b">C1</div>
+        <div>
+          <div class="c-title">Boat Capacity Constraint</div>
+          <div class="c-desc">Each crossing must carry <strong>1 or 2 people</strong>. Formally: <code>1 ≤ passengers ≤ 2</code>. The boat cannot cross empty and cannot carry more than 2.</div>
+        </div>
+      </div>
+      <div class="c-card">
+        <div class="c-badge r">C2</div>
+        <div>
+          <div class="c-title">Safety Constraint — Bank A (Left)</div>
+          <div class="c-desc">If missionaries are present on Bank A, cannibals must not outnumber them. Formally: <code>M<sub>L</sub> = 0  OR  C<sub>L</sub> ≤ M<sub>L</sub></code>.</div>
+        </div>
+      </div>
+      <div class="c-card">
+        <div class="c-badge r">C3</div>
+        <div>
+          <div class="c-title">Safety Constraint — Bank B (Right)</div>
+          <div class="c-desc">Same rule applies to the right bank simultaneously. Formally: <code>M<sub>R</sub> = 0  OR  C<sub>R</sub> ≤ M<sub>R</sub></code>. Both banks checked after every crossing.</div>
+        </div>
+      </div>
+      <div class="c-card">
+        <div class="c-badge g">C4</div>
+        <div>
+          <div class="c-title">Conservation Constraint</div>
+          <div class="c-desc">Total counts are always preserved: <code>M<sub>L</sub> + M<sub>R</sub> = N</code> and <code>C<sub>L</sub> + C<sub>R</sub> = N</code>. No one is created or lost.</div>
+        </div>
+      </div>
+      <div class="c-card">
+        <div class="c-badge g">C5</div>
+        <div>
+          <div class="c-title">Non-Negativity Constraint</div>
+          <div class="c-desc">All counts must be non-negative: <code>M<sub>L</sub>, C<sub>L</sub>, M<sub>R</sub>, C<sub>R</sub> ≥ 0</code>. You cannot send more people than are present on a bank.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Examples -->
+    <div class="sec-label">Valid vs Invalid States</div>
+    <div class="ex-box">
+      <div class="ex-ttl">Quick examples (N = 3)</div>
+      <div class="ex-row"><span class="ok">✔ SAFE</span><span>Bank has</span><div class="chips"><span class="chip m">⛪ 3</span><span class="chip c">💀 2</span></div><span style="color:var(--txt3);font-size:.72rem">3M ≥ 2C — OK</span></div>
+      <div class="ex-row"><span class="bad">✘ FAIL</span><span>Bank has</span><div class="chips"><span class="chip m">⛪ 1</span><span class="chip c">💀 2</span></div><span style="color:var(--txt3);font-size:.72rem">1M &lt; 2C — violates C2/C3</span></div>
+      <div class="ex-row"><span class="ok">✔ SAFE</span><span>Bank has</span><div class="chips"><span class="chip m">⛪ 0</span><span class="chip c">💀 3</span></div><span style="color:var(--txt3);font-size:.72rem">0M → any C allowed</span></div>
+      <div class="ex-row"><span class="bad">✘ FAIL</span><span>Bank has</span><div class="chips"><span class="chip m">⛪ 2</span><span class="chip c">💀 3</span></div><span style="color:var(--txt3);font-size:.72rem">2M &lt; 3C — violates C2/C3</span></div>
+    </div>
+
+    <!-- How to play -->
+    <div class="sec-label">How to Play</div>
+    <div class="ctrl-list">
+      <div class="ctrl-row"><span class="ctrl-key">⛪/💀  +/−</span><span>Choose how many missionaries and cannibals board the boat (1–2 total).</span></div>
+      <div class="ctrl-row"><span class="ctrl-key">🚣 Cross</span><span>Move selected passengers across the river. All constraints are validated before crossing.</span></div>
+      <div class="ctrl-row"><span class="ctrl-key">⚡ Auto-Solve</span><span>The AI uses BFS to find and animate the optimal (minimum-step) solution.</span></div>
+      <div class="ctrl-row"><span class="ctrl-key">↺ Reset</span><span>Return everyone to Bank A and reset the timer and move counter.</span></div>
+      <div class="ctrl-row"><span class="ctrl-key">📜 History</span><span>View every move you've made in the current session.</span></div>
+    </div>
+
+    <!-- Team -->
+    <div class="sec-label" style="margin-top:1.5rem">Project Team</div>
+    <div class="team-box">
+      <div class="team-hdr">
+        <div class="team-hdr-icon">👥</div>
+        <div>
+          <div class="team-hdr-title">Team Members</div>
+          <div class="team-hdr-sub">Cannibals &amp; Missionary Problem · AI Project</div>
+        </div>
+      </div>
+      <div class="team-body">
+        <div class="member">
+          <div class="avatar av1">VK</div>
+          <div class="member-info">
+            <div class="m-name">Varshini Kota</div>
+            <div class="m-role">Team Member</div>
+          </div>
+          <span class="member-num">#01</span>
+        </div>
+        <div class="member">
+          <div class="avatar av2">SM</div>
+          <div class="member-info">
+            <div class="m-name">Susmita Misser</div>
+            <div class="m-role">Team Member</div>
+          </div>
+          <span class="member-num">#02</span>
+        </div>
+        <div class="member">
+          <div class="avatar av3">AP</div>
+          <div class="member-info">
+            <div class="m-name">Alok Nishikanta Pradhan</div>
+            <div class="m-role">Team Member</div>
+          </div>
+          <span class="member-num">#03</span>
+        </div>
+      </div>
+    </div>
+
+    <div style="margin-top:1.5rem;padding-top:1rem;border-top:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:.8rem">
+      <span style="font-size:.78rem;color:var(--txt3)">Read the rules, then start the puzzle</span>
+      <a href="game.html"><button class="cta">▶ Play the Game →</button></a>
+    </div>
+
+  </div><!-- /right col -->
+
+</div><!-- /layout -->
+
+<script>
+/* SVG characters */
+function svgM(){
+  const id='m'+Math.random().toString(36).slice(2,6);
+  return`<svg viewBox="0 0 40 58" xmlns="http://www.w3.org/2000/svg">
+  <defs><radialGradient id="${id}" cx="38%" cy="33%"><stop offset="0%" stop-color="#fae0b0"/><stop offset="100%" stop-color="#e8c070"/></radialGradient></defs>
+  <path d="M9,26 Q4,39 6,58 L34,58 Q36,39 31,26 Z" fill="#f2ecd8" stroke="#c8c090" stroke-width=".8"/>
+  <rect x="11" y="29.5" width="18" height="2.8" rx="1.4" fill="#b89848" opacity=".5"/>
+  <rect x="17" y="33" width="6" height="11" rx="1.5" fill="#9a7838" opacity=".8"/>
+  <rect x="13.5" y="36.5" width="13" height="3.5" rx="1.5" fill="#9a7838" opacity=".8"/>
+  <path d="M13,26 Q20,31 27,26" fill="none" stroke="#c8c090" stroke-width="1.5"/>
+  <circle cx="20" cy="14" r="11" fill="url(#${id})" stroke="#e0b060" stroke-width=".8"/>
+  <path d="M9,12 Q10,2 20,2 Q30,2 31,12" fill="#6b4820"/>
+  <ellipse cx="16.5" cy="12.8" rx="1.9" ry="2.1" fill="#2e1808"/>
+  <ellipse cx="23.5" cy="12.8" rx="1.9" ry="2.1" fill="#2e1808"/>
+  <circle cx="16" cy="12" r=".7" fill="rgba(255,255,255,.75)"/>
+  <circle cx="23" cy="12" r=".7" fill="rgba(255,255,255,.75)"/>
+  <path d="M15.5,18 Q20,21.5 24.5,18" fill="none" stroke="#b05040" stroke-width="1.4" stroke-linecap="round"/>
+  <ellipse cx="20" cy="3.5" rx="9.5" ry="2.5" fill="none" stroke="#f5c830" stroke-width="1.6" opacity=".8"/>
+  <path d="M9,26 Q3,37 5.5,44.5" fill="none" stroke="#ddd8c0" stroke-width="6" stroke-linecap="round"/>
+  <path d="M31,26 Q37,37 34.5,44.5" fill="none" stroke="#ddd8c0" stroke-width="6" stroke-linecap="round"/>
+  <circle cx="5.5" cy="44.5" r="3.5" fill="#fae0b0"/>
+  <circle cx="34.5" cy="44.5" r="3.5" fill="#fae0b0"/>
+</svg>`;
+}
+function svgC(){
+  const id='c'+Math.random().toString(36).slice(2,6);
+  return`<svg viewBox="0 0 40 58" xmlns="http://www.w3.org/2000/svg">
+  <defs><radialGradient id="${id}" cx="38%" cy="33%"><stop offset="0%" stop-color="#a06830"/><stop offset="100%" stop-color="#7a4820"/></radialGradient></defs>
+  <path d="M10,26 Q5,39 7,58 L33,58 Q35,39 30,26 Z" fill="#8b1818" stroke="#400808" stroke-width=".8"/>
+  <path d="M12,33 L14.5,27.5 L17,33 L14.5,38Z" fill="#c02020" opacity=".6"/>
+  <path d="M23,33 L25.5,27.5 L28,33 L25.5,38Z" fill="#c02020" opacity=".6"/>
+  <circle cx="20" cy="14" r="11" fill="url(#${id})" stroke="#7a4820" stroke-width=".8"/>
+  <path d="M13.5,10 L12.5,14.5 L13.5,19" fill="none" stroke="#c01818" stroke-width="1.4" opacity=".7"/>
+  <path d="M26.5,10 L27.5,14.5 L26.5,19" fill="none" stroke="#c01818" stroke-width="1.4" opacity=".7"/>
+  <ellipse cx="16" cy="12.5" rx="2.4" ry="2.7" fill="#c01818"/>
+  <ellipse cx="24" cy="12.5" rx="2.4" ry="2.7" fill="#c01818"/>
+  <ellipse cx="16" cy="12.5" rx="1.2" ry="1.6" fill="#1a0808"/>
+  <ellipse cx="24" cy="12.5" rx="1.2" ry="1.6" fill="#1a0808"/>
+  <circle cx="15.4" cy="11.7" r=".5" fill="rgba(255,255,255,.85)"/>
+  <circle cx="23.4" cy="11.7" r=".5" fill="rgba(255,255,255,.85)"/>
+  <path d="M14,18.5 Q20,23.5 26,18.5" fill="none" stroke="#2a0808" stroke-width="1.5"/>
+  <line x1="17" y1="18.8" x2="17" y2="21.8" stroke="#e8d8a0" stroke-width="1.5"/>
+  <line x1="20" y1="19.2" x2="20" y2="23" stroke="#e8d8a0" stroke-width="1.5"/>
+  <line x1="23" y1="18.8" x2="23" y2="21.8" stroke="#e8d8a0" stroke-width="1.5"/>
+  <path d="M20,2.5 Q16,-.5 17,6 Q19,.5 21,6 Q22,-.5 20,2.5" fill="#c01818"/>
+  <rect x="10" y="8" width="20" height="3.2" rx="1.6" fill="#e8d8a0" opacity=".65"/>
+  <path d="M10,26 Q4,37 6.5,44.5" fill="none" stroke="#8b1818" stroke-width="6" stroke-linecap="round"/>
+  <path d="M30,26 Q36,37 33.5,44.5" fill="none" stroke="#8b1818" stroke-width="6" stroke-linecap="round"/>
+  <circle cx="6.5" cy="44.5" r="3.5" fill="#a06830"/>
+  <circle cx="33.5" cy="44.5" r="3.5" fill="#a06830"/>
+  <line x1="33.5" y1="44.5" x2="33.5" y2="17" stroke="#7a5020" stroke-width="2" stroke-linecap="round"/>
+  <polygon points="33.5,11 30.5,19 36.5,19" fill="#708090"/>
+</svg>`;
+}
+
+/* Build character grid */
+function buildChars(){
+  const g=document.getElementById('charGrid');
+  [{type:'M',name:'The Missionary',role:'Missionary',trait:'Peaceful · guided by faith'},{type:'M',name:'Mission Leader',role:'Missionary',trait:'Calm · strategic thinker'},{type:'C',name:'The Cannibal',role:'Cannibal',trait:'Fierce · watches numbers'},{type:'C',name:'Cannibal Chief',role:'Cannibal',trait:'Patient · waits for his chance'}].forEach(ch=>{
+    const c=document.createElement('div');
+    c.className='char-card';
+    c.innerHTML=(ch.type==='M'?svgM():svgC())+
+      `<div class="char-info"><div class="char-name">${ch.name}</div><div class="char-type ${ch.type==='M'?'m':'c'}">${ch.role}</div><div style="font-size:.7rem;color:#8896aa;margin-top:.15rem">${ch.trait}</div></div>`;
+    g.appendChild(c);
+  });
+}
+
+/* Difficulty picker */
+function pickDiff(card){
+  document.querySelectorAll('.d-pick').forEach(c=>c.classList.remove('sel'));
+  card.classList.add('sel');
+  const n=card.dataset.n;
+  sessionStorage.setItem('rof_n',n);
+  updateLinks();
+}
+function updateLinks(){
+  const n=sessionStorage.getItem('rof_n')||'3';
+  document.getElementById('playLink').href=`game.html?n=${n}`;
+  document.getElementById('ctaLink').href=`game.html?n=${n}`;
+}
+const saved=sessionStorage.getItem('rof_n');
+if(saved){document.querySelectorAll('.d-pick').forEach(c=>c.classList.toggle('sel',c.dataset.n===saved));}
+updateLinks();
+
+buildChars();
+</script>
+</body>
+</html>
